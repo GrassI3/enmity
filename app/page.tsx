@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { User } from "stream-chat";
 import { LoadingIndicator } from "stream-chat-react";
 import { useUser } from "@clerk/clerk-react";  // Changed to useUser
@@ -56,9 +56,30 @@ export default function Home() {
     if(apiKey){
       setHomeState({ apiKey: apiKey, user: user, token: token});
     }
-
-    
   }
+
+  useEffect(() => {
+    if(
+      clerkUser?.id &&
+      clerkUser?.primaryEmailAddress?.emailAddress &&
+      !clerkUser?.publicMetadata.streamRegistered
+    ){
+      registerUser().then((result) => {
+        getUserToken(
+          clerkUser.id,
+          clerkUser?.primaryEmailAddress?.emailAddress || 'Unknown'
+        );
+      });
+    }
+    else{
+      if (clerkUser?.id){
+        getUserToken(
+          clerkUser?.id || 'Unknown',
+          clerkUser?.primaryEmailAddress?.emailAddress || 'Unknown'
+        );
+      }
+    }
+  }, [registerUser, clerkUser]);
 
   if (!homeState) {
     return <LoadingIndicator />;
