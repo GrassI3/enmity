@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { User } from "stream-chat";
 import { LoadingIndicator } from "stream-chat-react";
 import { useUser } from "@clerk/clerk-react";  // Changed to useUser
+import MyChat from '@/components/MyChat';
 
 type HomeState = {
   apiKey: string;
@@ -89,5 +90,5 @@ export default function Home() {
     return <LoadingIndicator />;
   }
 
-  return <div>Welcome to Enmity</div>;
+  return <MyChat {...homeState} />;
 }

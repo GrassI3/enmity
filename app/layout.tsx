@@ -6,6 +6,7 @@ import { ClerkProvider,
   SignedIn,
   SignedOut,
   UserButton } from "@clerk/nextjs";
+import { EnmityContextProvider } from "@/contexts/EnmityContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
+        <EnmityContextProvider>
+          <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <SignedOut>
@@ -41,6 +43,8 @@ export default function RootLayout({
           </SignedIn>
           {children}
         </body>
+        </EnmityContextProvider>
+        
       </html>
     </ClerkProvider>
   );
