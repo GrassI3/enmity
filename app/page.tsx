@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useEffect, useState } from "react";
 import { User } from "stream-chat";
 import { LoadingIndicator } from "stream-chat-react";
@@ -52,7 +54,9 @@ export default function Home() {
       image: 'https://getstream.io/random_png/?id=${userId}&name=${userName}',
     };
 
-    const apiKey = process.env.STREAM_API_KEY;
+   // console.log(apiKey);
+
+    const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
     if(apiKey){
       setHomeState({ apiKey: apiKey, user: user, token: token});
     }

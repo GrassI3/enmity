@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     }
   const serverClient = StreamChat.getInstance(
     apiKey,
-    process.env.STREAM_CHAT_SECRET
+    process.env.STREAM_SECRET
   );
   const body = await request.json();
   console.log('[/api/register-user] Body:', body);
