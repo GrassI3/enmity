@@ -69,3 +69,20 @@ body {
   background-image: linear-gradient(-45deg, #105424, #7289da);
   opacity: 0.5;
 }
+
+.labelTitle {
+  @apply uppercase text-sm font-bold text-gray-600;
+}
+
+input,
+select {
+  @apply w-full p-2 rounded;
+}
+
+input[type='text'] {
+  @apply bg-transparent outline-transparent;
+}
+
+input[type='text']:focus {
+  outline: none;
+}
