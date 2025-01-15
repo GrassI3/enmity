@@ -12,6 +12,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         'dark-gray': '#dfe1e4',
+        enmity: '#75fa61',
       },
     },
   },

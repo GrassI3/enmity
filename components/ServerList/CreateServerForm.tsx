@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { JSX } from 'react';
 import Link from 'next/link';
 import CloseIcon from '../Icons';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { UserObject } from '@/models/UserObject';
 import { useChatContext } from 'stream-chat-react';
 import UserRow from '../UserRow';
@@ -17,6 +17,7 @@ export default function CreateServerForm(): JSX.Element {
     const params = useSearchParams();
     const showCreateServerForm = params.get('createServer');
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const router = useRouter();
 
     const { client } = useChatContext();
     const initialState: FormState = {
@@ -105,9 +106,36 @@ export default function CreateServerForm(): JSX.Element {
                     ))}
                 </div>
             </form>
-            <div className='flex space-x-6 items-center justify-end p-6 bg-gray-200'></div>
+            <div className='flex space-x-6 items-center justify-end p-6 bg-gray-200'>
+                <Link href={'/'} className='font-semibold text-gray-500'>
+                Cancel
+                </Link>
+                <button
+                type='submit'
+                disabled={buttonDisabled()}
+                className={`bg-enmity rounded py-2 px-4 text-white font-bold uppercase ${
+                    buttonDisabled() ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={createClicked}
+                >
+                    Create Server
+                </button>
+            </div>
         </dialog>
     );
+
+    function buttonDisabled(): boolean {
+        return (
+            !formData.serverName ||
+            !formData.serverImage ||
+            formData.users.length <= 1
+        );
+    }
+
+    function createClicked() {
+        setFormData(initialState);
+        router.replace('/');
+    }
 
     function userChanged(user: UserObject, checked: boolean) {
         if (checked) {
