@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { JSX } from 'react';
 import Link from 'next/link';
 import CloseIcon from '../Icons';
 import { useSearchParams } from 'next/navigation';
 import { UserObject } from '@/models/UserObject';
+import { useChatContext } from 'stream-chat-react';
+import UserRow from '../UserRow';
 
 type FormState = {
     serverName: string;
@@ -16,12 +18,30 @@ export default function CreateServerForm(): JSX.Element {
     const showCreateServerForm = params.get('createServer');
     const dialogRef = useRef<HTMLDialogElement>(null);
 
+    const { client } = useChatContext();
     const initialState: FormState = {
         serverName: '',
         serverImage: '',
         users: [],
     };
     const [formData, setFormData] = useState<FormState>(initialState);
+    const [users, setUsers] = useState<UserObject[]>([]);
+
+    const loadUsers = useCallback(async () => {
+        const response = await client.queryUsers({});
+        const users: UserObject[] = response.users
+        .filter((user) => user.role !== 'admin')
+        .map((user) => {
+            return {
+                id: user.id,
+                name: user.name ?? user.id,
+                image: user.image as string,
+                online: user.online,
+                lastOnline: user.last_active,
+            };
+        });
+        if (users) setUsers(users);
+    }, [client]);
 
     useEffect(() => {
         if (showCreateServerForm && dialogRef.current) {
@@ -30,6 +50,10 @@ export default function CreateServerForm(): JSX.Element {
             dialogRef.current?.close();
         }
     }, [showCreateServerForm]);
+
+    useEffect(() => {
+        loadUsers();
+    }, [loadUsers]);
 
     return (
         <dialog className='absolute z-10 space-y-2 rounded-xl' ref={dialogRef}>
@@ -45,7 +69,7 @@ export default function CreateServerForm(): JSX.Element {
                 <label className='labelTitle' htmlFor='serverName'>
                     Server Name
                 </label>
-                <div className='flex items-center bg-gray-100'>
+                <div className='flex items-center bg-gray-100 rounded'>
                     <span className='text-2xl p-2 text-gray-500'>#</span>
                     <input 
                     type='text'
@@ -58,7 +82,44 @@ export default function CreateServerForm(): JSX.Element {
                     required
                     />
                 </div>
+                <label className='labelTitle' htmlFor='serverImage'>
+                    Image URL
+                </label>
+                <div className='flex items-center bg-gray-100 rounded'>
+                    <span className='text-2xl p-2 text-gray-500'>#</span>
+                    <input
+                    type='text'
+                    id='serverImage'
+                    name='serverImage'
+                    value={formData.serverImage}
+                    onChange={(e) =>
+                        setFormData({ ...formData, serverImage: e.target.value})
+                    }
+                    required
+                    />
+                </div>
+                <h2 className='mb-2 labelTitle'>Add Users</h2>
+                <div className='max-h-64 overflow-y-scroll'>
+                    {users.map((user) => ( 
+                        <UserRow key={user.id} user={user} userChanged={userChanged}/>    
+                    ))}
+                </div>
             </form>
+            <div className='flex space-x-6 items-center justify-end p-6 bg-gray-200'></div>
         </dialog>
     );
+
+    function userChanged(user: UserObject, checked: boolean) {
+        if (checked) {
+            setFormData({
+                ...formData,
+                users: [...formData.users, user],
+            });
+        } else {
+            setFormData({
+                ...formData,
+                users: formData.users.filter((thisUser) => thisUser.id != user.id),
+            });
+        }
+    }
 }
