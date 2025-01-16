@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { UserObject } from '@/models/UserObject';
 import { useChatContext } from 'stream-chat-react';
 import UserRow from '../UserRow';
+import { useEnmityContext } from '@/contexts/EnmityContext';
 
 type FormState = {
     serverName: string;
@@ -20,6 +21,7 @@ export default function CreateServerForm(): JSX.Element {
     const router = useRouter();
 
     const { client } = useChatContext();
+    const { createServer } = useEnmityContext();
     const initialState: FormState = {
         serverName: '',
         serverImage: '',
@@ -31,16 +33,16 @@ export default function CreateServerForm(): JSX.Element {
     const loadUsers = useCallback(async () => {
         const response = await client.queryUsers({});
         const users: UserObject[] = response.users
-        .filter((user) => user.role !== 'admin')
-        .map((user) => {
-            return {
-                id: user.id,
-                name: user.name ?? user.id,
-                image: user.image as string,
-                online: user.online,
-                lastOnline: user.last_active,
-            };
-        });
+            .filter((user) => user.role !== 'admin')
+            .map((user) => {
+                return {
+                    id: user.id,
+                    name: user.name ?? user.id,
+                    image: user.image as string,
+                    online: user.online,
+                    lastOnline: user.last_active,
+                };
+            });
         if (users) setUsers(users);
     }, [client]);
 
@@ -63,7 +65,7 @@ export default function CreateServerForm(): JSX.Element {
                     Create new server
                 </h2>
                 <Link href='/'>
-                <CloseIcon />
+                    <CloseIcon className='w-10 h-10 text-gray-400'/>
                 </Link>
             </div>
             <form method='dialog' className='flex flex-col space-y-2 px-6'>
@@ -72,15 +74,15 @@ export default function CreateServerForm(): JSX.Element {
                 </label>
                 <div className='flex items-center bg-gray-100 rounded'>
                     <span className='text-2xl p-2 text-gray-500'>#</span>
-                    <input 
-                    type='text'
-                    id='serverName'
-                    name='serverName'
-                    value={formData.serverName}
-                    onChange={(e) =>
-                        setFormData({ ...formData, serverName: e.target.value })
-                    }
-                    required
+                    <input
+                        type='text'
+                        id='serverName'
+                        name='serverName'
+                        value={formData.serverName}
+                        onChange={(e) =>
+                            setFormData({ ...formData, serverName: e.target.value })
+                        }
+                        required
                     />
                 </div>
                 <label className='labelTitle' htmlFor='serverImage'>
@@ -89,34 +91,33 @@ export default function CreateServerForm(): JSX.Element {
                 <div className='flex items-center bg-gray-100 rounded'>
                     <span className='text-2xl p-2 text-gray-500'>#</span>
                     <input
-                    type='text'
-                    id='serverImage'
-                    name='serverImage'
-                    value={formData.serverImage}
-                    onChange={(e) =>
-                        setFormData({ ...formData, serverImage: e.target.value})
-                    }
-                    required
+                        type='text'
+                        id='serverImage'
+                        name='serverImage'
+                        value={formData.serverImage}
+                        onChange={(e) =>
+                            setFormData({ ...formData, serverImage: e.target.value })
+                        }
+                        required
                     />
                 </div>
                 <h2 className='mb-2 labelTitle'>Add Users</h2>
                 <div className='max-h-64 overflow-y-scroll'>
-                    {users.map((user) => ( 
-                        <UserRow key={user.id} user={user} userChanged={userChanged}/>    
+                    {users.map((user) => (
+                        <UserRow key={user.id} user={user} userChanged={userChanged} />
                     ))}
                 </div>
             </form>
             <div className='flex space-x-6 items-center justify-end p-6 bg-gray-200'>
                 <Link href={'/'} className='font-semibold text-gray-500'>
-                Cancel
+                    Cancel
                 </Link>
                 <button
-                type='submit'
-                disabled={buttonDisabled()}
-                className={`bg-enmity rounded py-2 px-4 text-white font-bold uppercase ${
-                    buttonDisabled() ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                onClick={createClicked}
+                    type='submit'
+                    disabled={buttonDisabled()}
+                    className={`bg-enmity rounded py-2 px-4 text-white font-bold uppercase ${buttonDisabled() ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    onClick={createClicked}
                 >
                     Create Server
                 </button>
@@ -133,6 +134,12 @@ export default function CreateServerForm(): JSX.Element {
     }
 
     function createClicked() {
+        createServer(
+            client,
+            formData.serverName,
+            formData.serverImage,
+            formData.users.map((user) => user.id)
+        );
         setFormData(initialState);
         router.replace('/');
     }

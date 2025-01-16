@@ -86,3 +86,12 @@ input[type='text'] {
 input[type='text']:focus {
   outline: none;
 }
+
+input[type='checkbox'] {
+  @apply w-6 h-6;
+  accent-color: black;
+}
+
+dialog {
+  width: clamp(30rem, 50%, 50rem);
+}
