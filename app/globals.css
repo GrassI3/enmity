@@ -5,6 +5,7 @@
 :root {
   --background: #dcf8c6;
   --foreground: #171717;
+  --enmity-purple: #7289da;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -94,4 +95,19 @@ input[type='checkbox'] {
 
 dialog {
   width: clamp(30rem, 50%, 50rem);
+}
+
+.enmity-icon {
+  @apply bg-white p-3 w-full h-full;
+  content: '';
+
+  background: url('../assets/enmity-logo.png') no-repeat center center, black;
+  background-origin: content-box;
+}
+
+.enmity-icon:hover {
+  background: url('../assets/enmity-logo-purple.png') no-repeat center center,
+    var(--enmity-purple);
+  background-origin: content-box;
+  --offset: 1.5rem;
 }
