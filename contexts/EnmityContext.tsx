@@ -2,11 +2,13 @@
 
 import { EnmityServer } from "@/models/EnmityServer";
 import { createContext, useCallback, useContext, useState } from "react";
-import { StreamChat } from "stream-chat";
+import { Channel, StreamChat, ChannelFilters } from "stream-chat";
+import { DefaultStreamChatGenerics } from "stream-chat-react";
 import { v4 as uuid } from 'uuid';
 
 type EnmityState = {
     server?: EnmityServer;
+    channelsByCategories: Map<string, Array<Channel<DefaultStreamChatGenerics>>>;
     changeServer: (server: EnmityServer | undefined, client: StreamChat) => void;
     createServer: (
         client: StreamChat,
@@ -18,6 +20,7 @@ type EnmityState = {
 
 const initialValue: EnmityState = {
     server: undefined,
+    channelsByCategories: new Map(),
     changeServer: () => {},
     createServer: () => { },
 };
@@ -33,6 +36,10 @@ export const EnmityContextProvider: any = ({
 
     const changeServer = useCallback(
         async (server: EnmityServer | undefined, client: StreamChat) => {
+            let filters: ChannelFilters = {
+                type: 'messaging',
+                members: { $in: [client.userID as string] },
+            };
             setMyState((myState) => {
                 return { ...myState, server };
             });
@@ -72,6 +79,7 @@ export const EnmityContextProvider: any = ({
 
     const store: EnmityState = {
         server: myState.server,
+        channelsByCategories: myState.channelsByCategories,
         changeServer: changeServer,
         createServer: createServer,
     };

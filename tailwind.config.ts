@@ -14,6 +14,7 @@ export default {
         'dark-gray': '#dfe1e4',
         'medium-gray': '#f0f1f3',
         enmity: '#75fa61',
+        'dark-enmity': '#47c452',
       },
     },
   },
