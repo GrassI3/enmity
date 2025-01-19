@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { JSX } from 'react';
 import Link from 'next/link';
-import CloseIcon from '../Icons';
+import { CloseIcon } from '../Icons';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { UserObject } from '@/models/UserObject';
 import { useChatContext } from 'stream-chat-react';
