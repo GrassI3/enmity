@@ -15,6 +15,8 @@ export default {
         'medium-gray': '#f0f1f3',
         enmity: '#75fa61',
         'dark-enmity': '#47c452',
+        'light-gray': '#e8eaec',
+        'hover-gray': '#cdcfd3',
       },
     },
   },

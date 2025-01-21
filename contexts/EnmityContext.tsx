@@ -1,6 +1,7 @@
 'use client';
 
 import { EnmityServer } from "@/models/EnmityServer";
+import { channel } from "diagnostics_channel";
 import { createContext, useCallback, useContext, useState } from "react";
 import { Channel, StreamChat, ChannelFilters } from "stream-chat";
 import { DefaultStreamChatGenerics } from "stream-chat-react";
@@ -40,8 +41,42 @@ export const EnmityContextProvider: any = ({
                 type: 'messaging',
                 members: { $in: [client.userID as string] },
             };
+            if (!server) {
+                filters.member_count = 2;
+            }
+
+            const channels = await client.queryChannels(filters);
+            const channelsByCategories = new Map<
+            string,
+            Array<Channel<DefaultStreamChatGenerics>>
+            >();
+            if (server) {
+                const categories = new Set(
+                    channels
+                    .filter((channel) => {
+                        return channel.data?.data?.server === server.name;
+                    })
+                    .map((channel) => {
+                        return channel.data?.data?.category;
+                    })
+                );
+
+                for (const category of Array.from(categories)) {
+                    channelsByCategories.set(
+                        category,
+                        channels.filter((channel) => {
+                            return (
+                                channel.data?.data?.server === server.name &&
+                                channel.data?.data?.category === category
+                            );
+                        })
+                    );
+                }
+            } else {
+                channelsByCategories.set('Direct Messages', channels);
+            }
             setMyState((myState) => {
-                return { ...myState, server };
+                return { ...myState, server, channelsByCategories };
             });
         },
         [setMyState]
