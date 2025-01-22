@@ -2,6 +2,7 @@ import { JSX } from "react";
 import { useEnmityContext } from "@/contexts/EnmityContext";
 import ChannelListTopBar from "./TopBar/ChannelListTopBar";
 import CategoryItem from "./CategoryItem/CategoryItem";
+import ChannelListBottomBar from "./BottomBar/ChannelListBottomBar";
 
 export default function CustomChannelList(): JSX.Element {
     const { server, channelsByCategories } = useEnmityContext();
@@ -20,6 +21,8 @@ export default function CustomChannelList(): JSX.Element {
                     />
                 ))}
             </div>
+
+            <ChannelListBottomBar />
         </div>
     );
 }
