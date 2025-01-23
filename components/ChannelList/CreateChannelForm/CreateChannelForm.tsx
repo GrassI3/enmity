@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useChatContext } from 'stream-chat-react';
 import Link from 'next/link';
 import { CloseIcon, Speaker } from '@/components/Icons';
-//import UserRow from './UserRow';
+import UserRow from '@/components/UserRow';
 //import { useStreamVideoClient } from '@stream-io/video-react-sdk';
 
 type FormState = {
@@ -27,7 +27,7 @@ export default function CreateChannelForm(): JSX.Element {
 
     const { client } = useChatContext();
     //const videoClient = useStreamVideoClient();
-    //const { server, createChannel, createCall } = useEnmityContext();
+    const { createChannel } = useEnmityContext();
     const initialState: FormState = {
         channelType: 'text',
         channelName: '',
@@ -84,6 +84,103 @@ export default function CreateChannelForm(): JSX.Element {
                     <CloseIcon className='w-10 h-10 text-gray-400' />
                 </Link>
             </div>
+            <form method='dialog' className='flex flex-col space-y-4 px-6'>
+                <label className='labelTitle' htmlFor='channelName'>
+                    Channel Name
+                </label>
+                <div className='flex items-center bg-gray-100'>
+                    <span className='text-2xl p-2 text-gray-500'>#</span>
+                    <input
+                        type='text'
+                        id='channelName'
+                        name='channelName'
+                        value={formData.channelName}
+                        onChange={(e) =>
+                            setFormData({ ...formData, channelName: e.target.value })
+                        }
+                    />
+                </div>
+                <label
+                    className='labelTitle flex items-center justify-between'
+                    htmlFor='category'
+                >
+                    Category
+                </label>
+                <div className='flex items-center bg-gray-100'>
+                    <span className='text-2xl p-2 text-gray-500'>#</span>
+                    <input
+                        type='text'
+                        id='category'
+                        name='category'
+                        value={formData.category}
+                        onChange={(e) =>
+                            setFormData({ ...formData, category: e.target.value })
+                        }
+                    />
+                </div>
+                <h2 className='mb-2 labelTitle'>Add Users</h2>
+                <div className='max-h-64 overflow-y-scroll'>
+                    {users.map((user) => (
+                        <UserRow user={user} userChanged={userChanged} key={user.id} />
+                    ))}
+                </div>
+            </form>
+            <div className='flex space-x-6 items-center justify-end p-6 bg-gray-200'>
+                <Link href={'/'} className='font-semibold text-gray-500'>
+                    Cancel
+                </Link>
+                <button
+                    type='submit'
+                    disabled={buttonDisabled()}
+                    className={`bg-discord rounded py-2 px-4 text-white font-bold uppercase ${buttonDisabled() ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    onClick={createClicked}
+                >
+                    Create Channel
+                </button>
+            </div>
         </dialog>
     );
+
+    function buttonDisabled(): boolean {
+        return (
+            !formData.channelName || !formData.category || formData.users.length <= 1
+        );
+    }
+
+
+    function userChanged(user: UserObject, checked: boolean) {
+        if (checked) {
+            setFormData({
+                ...formData,
+                users: [...formData.users, user],
+            });
+        } else {
+            setFormData({
+                ...formData,
+                users: formData.users.filter((thisUser) => thisUser.id !== user.id),
+            });
+        }
+    }
+
+    function createClicked() {
+        createChannel(
+            client,
+            formData.channelName,
+            formData.category,
+            formData.users.map((user) => user.id)
+        );
+        /*  case 'voice':
+              if (videoClient && server) {
+                  createCall(
+                      videoClient,
+                      server,
+                      formData.channelName,
+                      formData.users.map((user) => user.id)
+                  );
+              }*/
+
+        setFormData(initialState);
+        router.replace('/');
+    }
 }

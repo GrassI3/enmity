@@ -17,13 +17,20 @@ type EnmityState = {
         imageUrl: string,
         userIds: string[]
     ) => void;
+    createChannel: (
+        client: StreamChat,
+        name: string,
+        category: string,
+        userIds: string[]
+    ) => void;
 };
 
 const initialValue: EnmityState = {
     server: undefined,
     channelsByCategories: new Map(),
-    changeServer: () => {},
+    changeServer: () => { },
     createServer: () => { },
+    createChannel: () => { },
 };
 
 const EnmityContext = createContext<EnmityState>(initialValue);
@@ -47,18 +54,18 @@ export const EnmityContextProvider: any = ({
 
             const channels = await client.queryChannels(filters);
             const channelsByCategories = new Map<
-            string,
-            Array<Channel<DefaultStreamChatGenerics>>
+                string,
+                Array<Channel<DefaultStreamChatGenerics>>
             >();
             if (server) {
                 const categories = new Set(
                     channels
-                    .filter((channel) => {
-                        return channel.data?.data?.server === server.name;
-                    })
-                    .map((channel) => {
-                        return channel.data?.data?.category;
-                    })
+                        .filter((channel) => {
+                            return channel.data?.data?.server === server.name;
+                        })
+                        .map((channel) => {
+                            return channel.data?.data?.category;
+                        })
                 );
 
                 for (const category of Array.from(categories)) {
@@ -112,11 +119,40 @@ export const EnmityContextProvider: any = ({
         []
     );
 
+    const createChannel = useCallback(
+        async (
+            client: StreamChat,
+            name: string,
+            category: string,
+            userIds: string[]
+        ) => {
+            if (client.userID) {
+                const channel = client.channel('messaging', {
+                    name: name,
+                    members: userIds,
+                    data: {
+                        image: myState.server?.image,
+                        serverId: myState.server?.id,
+                        server: myState.server?.name,
+                        category: category,
+                    },
+                });
+                try {
+                    const response = await channel.create();
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        },
+        [myState.server]
+    );
+
     const store: EnmityState = {
         server: myState.server,
         channelsByCategories: myState.channelsByCategories,
         changeServer: changeServer,
         createServer: createServer,
+        createChannel: createChannel,
     };
 
     return (
