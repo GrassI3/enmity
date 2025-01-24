@@ -13,6 +13,11 @@ import {
 import 'stream-chat-react/dist/css/v2/index.css';
 import ServerList from './ServerList/ServerList';
 import CustomChannelList from './ChannelList/CustomChannelList';
+import CustomDateSeparator from './MessageList/CustomDateSeparator/CustomDateSeparator';
+import CustomChannelHeader from './MessageList/CustomChannelHeader/CustomChannelHeader';
+import CustomMessage from './MessageList/CustomMessage/CustomMessage';
+import { customReactionOptions } from './MessageList/CustomReactions/CustomReactionsSelector';
+import MessageComposer from './MessageList/MessageComposer/MessageComposer';
 
 export default function MyChat({
     apiKey,
@@ -38,7 +43,13 @@ export default function MyChat({
             <section className='flex h-screen w-screen layout'>
                 <ServerList />
                 <ChannelList List={CustomChannelList}/>
-                <Channel>
+                <Channel
+                Message={CustomMessage}
+                Input={MessageComposer}
+                DateSeparator={CustomDateSeparator}
+                reactionOptions={customReactionOptions}
+                HeaderComponent={CustomChannelHeader}
+                >
                     <Window>
                         <MessageList />
                         <MessageInput />
