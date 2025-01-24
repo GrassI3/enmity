@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const token = serverClient.createToken(userId);
 
     const response = {
-        userId: userId,
+        //userId: userId,
         token: token,
     };
 

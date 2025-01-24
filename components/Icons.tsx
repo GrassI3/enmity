@@ -44,7 +44,7 @@ export function ChevronDown({
     );
 }
 
-export function PersonIcon({ className = 'h-8 w-8' }: IconProps): JSX.Element {
+/*export function PersonIcon({ className = 'h-8 w-8', }: IconProps): JSX.Element {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +62,7 @@ export function PersonIcon({ className = 'h-8 w-8' }: IconProps): JSX.Element {
         </svg>
 
     );
-}
+}*/
 
 export function PlusIcon({
     className = 'h-5 w-5 text-gray-500',

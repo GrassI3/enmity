@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useChatContext } from 'stream-chat-react';
 import Link from 'next/link';
-import { CloseIcon, Speaker } from '@/components/Icons';
+import { CloseIcon } from '@/components/Icons';
 import UserRow from '@/components/UserRow';
 //import { useStreamVideoClient } from '@stream-io/video-react-sdk';
 

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import CreateServerForm from './CreateServerForm';
 import { useChatContext } from 'stream-chat-react';
-import { channel } from 'diagnostics_channel';
 import { Channel } from 'stream-chat';
 import { useEnmityContext } from '@/contexts/EnmityContext';
 
@@ -90,12 +89,7 @@ export default function ServerList(): JSX.Element {
   );
 
 
-  function checkIfUrl(path: string): Boolean {
-    try {
-      const _ = new URL(path);
+  function checkIfUrl(path: string): boolean {
       return true;
-    } catch (_) {
-      return false;
-    }
   }
 };
