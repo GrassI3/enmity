@@ -63,7 +63,7 @@ export default function Home() {
     }
   }
 
- /* useEffect(() => {
+  useEffect(() => {
     if(
       clerkUser?.id &&
       clerkUser?.primaryEmailAddress?.emailAddress &&
@@ -84,7 +84,7 @@ export default function Home() {
         );
       }
     }
-  }, [registerUser, clerkUser]);*/
+  }, [registerUser, clerkUser]);
 
   if (!homeState) {
     return <LoadingIndicator />;

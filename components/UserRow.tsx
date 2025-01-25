@@ -1,6 +1,5 @@
 import { UserObject } from '@/model/UserObject';
 import Image from 'next/image';
-import { PersonIcon } from './Icons';
 import { JSX } from 'react';
 
 export default function UserRow({
@@ -31,7 +30,7 @@ export default function UserRow({
                     className='w-8 h-8 rounded-full'
                     />
                 )}
-                {!user.image && <PersonIcon />}
+                {!user.image }
                 <p>
                     <span className='block text-gray-600'>
                         {user.name}
