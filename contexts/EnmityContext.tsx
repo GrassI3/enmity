@@ -1,15 +1,23 @@
 'use client';
 
-import { EnmityServer } from "@/models/EnmityServer";
-import { channel } from "diagnostics_channel";
 import { createContext, useCallback, useContext, useState } from "react";
 import { Channel, StreamChat, ChannelFilters } from "stream-chat";
 import { DefaultStreamChatGenerics } from "stream-chat-react";
 import { v4 as uuid } from 'uuid';
+import { EnmityServer } from "@/models/EnmityServer";
+
+type ChannelWithData = Channel<DefaultStreamChatGenerics> & {
+    data?: {
+        data?: {
+            server?: string;
+            category?: string;
+        }
+    }
+};
 
 type EnmityState = {
     server?: EnmityServer;
-    channelsByCategories: Map<string, Array<Channel<DefaultStreamChatGenerics>>>;
+    channelsByCategories: Map<string, ChannelWithData[]>;
     changeServer: (server: EnmityServer | undefined, client: StreamChat) => void;
     createServer: (
         client: StreamChat,
@@ -28,14 +36,14 @@ type EnmityState = {
 const initialValue: EnmityState = {
     server: undefined,
     channelsByCategories: new Map(),
-    changeServer: () => { },
-    createServer: () => { },
-    createChannel: () => { },
+    changeServer: () => {},
+    createServer: () => {},
+    createChannel: () => {},
 };
 
 const EnmityContext = createContext<EnmityState>(initialValue);
 
-export const EnmityContextProvider: any = ({
+export const EnmityContextProvider = ({
     children,
 }: {
     children: React.ReactNode;
@@ -48,43 +56,42 @@ export const EnmityContextProvider: any = ({
                 type: 'messaging',
                 members: { $in: [client.userID as string] },
             };
+            
             if (!server) {
                 filters.member_count = 2;
             }
 
-            const channels = await client.queryChannels(filters);
-            const channelsByCategories = new Map<
-                string,
-                Array<Channel<DefaultStreamChatGenerics>>
-            >();
+            const channels = await client.queryChannels(filters) as ChannelWithData[];
+            const channelsByCategories = new Map<string, ChannelWithData[]>();
+
             if (server) {
                 const categories = new Set(
                     channels
-                        .filter((channel) => {
-                            return channel.data?.data?.server === server.name;
-                        })
-                        .map((channel) => {
-                            return channel.data?.data?.category;
-                        })
+                        .filter(channel => 
+                            channel.data?.data?.server === server.name
+                        )
+                        .map(channel => channel.data?.data?.category)
+                        .filter(Boolean)
                 );
 
                 for (const category of Array.from(categories)) {
                     channelsByCategories.set(
-                        category,
-                        channels.filter((channel) => {
-                            return (
-                                channel.data?.data?.server === server.name &&
-                                channel.data?.data?.category === category
-                            );
-                        })
+                        category as string,
+                        channels.filter(channel => 
+                            channel.data?.data?.server === server.name && 
+                            channel.data?.data?.category === category
+                        )
                     );
                 }
             } else {
                 channelsByCategories.set('Direct Messages', channels);
             }
-            setMyState((myState) => {
-                return { ...myState, server, channelsByCategories };
-            });
+
+            setMyState(prev => ({
+                ...prev, 
+                server, 
+                channelsByCategories
+            }));
         },
         [setMyState]
     );
@@ -114,7 +121,6 @@ export const EnmityContextProvider: any = ({
             } catch (err) {
                 console.error(err);
             }
-
         },
         []
     );
@@ -137,10 +143,11 @@ export const EnmityContextProvider: any = ({
                         category: category,
                     },
                 });
+                
                 try {
-                    const response = await channel.create();
+                    await channel.create();
                 } catch (err) {
-                    console.log(err);
+                    console.error(err);
                 }
             }
         },
@@ -150,13 +157,15 @@ export const EnmityContextProvider: any = ({
     const store: EnmityState = {
         server: myState.server,
         channelsByCategories: myState.channelsByCategories,
-        changeServer: changeServer,
-        createServer: createServer,
-        createChannel: createChannel,
+        changeServer,
+        createServer,
+        createChannel,
     };
 
     return (
-        <EnmityContext.Provider value={store}>{children}</EnmityContext.Provider>
+        <EnmityContext.Provider value={store}>
+            {children}
+        </EnmityContext.Provider>
     );
 };
 

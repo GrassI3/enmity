@@ -10,15 +10,22 @@ import { useChatContext } from 'stream-chat-react';
 import { Channel } from 'stream-chat';
 import { useEnmityContext } from '@/contexts/EnmityContext';
 
+interface ChannelData {
+  id?: string;
+  server?: string;
+  image?: string;
+}
+
 export default function ServerList(): JSX.Element {
   const { client } = useChatContext();
   const { server: activeServer, changeServer } = useEnmityContext();
-
+  
   const [serverList, setServerList] = useState<EnmityServer[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const loadServerList = useCallback(async (): Promise<void> => {
     if (!client?.userID) {
-      console.error("User ID is not available.");
+      setError("User ID is not available.");
       return;
     }
 
@@ -28,35 +35,28 @@ export default function ServerList(): JSX.Element {
         members: { $in: [client.userID as string] },
       });
 
-      const serverSet: Set<EnmityServer> = new Set(
-        channels
-          .map((channel: Channel) => {
-            const channelData = channel.data?.data || {}; // Get channel data or fallback to empty object
+      const servers = channels.map((channel: Channel) => {
+        const channelData = channel.data?.data as ChannelData || {}; // Cast to ChannelData
 
-            // Fallback to UUID if necessary
-            return {
-              id: channelData.id || channel.cid || uuid(), 
-              name: channelData.server || 'Unnamed', // Default to 'Unnamed' if server name is missing
-              image: channelData.image || '', // Fallback to empty string for image if missing
-              server: channelData.server, // Ensure we're adding the correct 'server' data
-            };
-          })
-          .filter((server: EnmityServer) => server.name && server.name !== 'Unnamed') // Filter out 'Unnamed' servers
-          .filter(
-            (server: EnmityServer, index, self) =>
-              index === self.findIndex((serverObject) => serverObject.name === server.name) // Ensure uniqueness of names
-          )
-      );
+        return {
+          id: channelData.id || channel.cid || uuid(),
+          name: channelData.server || 'Unnamed',
+          image: channelData.image || '',
+          server: channelData.server,
+        };
+      }).filter(server => server.name && server.name !== 'Unnamed');
 
-      const serverArray = Array.from(serverSet.values());
-      setServerList(serverArray);
+      const uniqueServers = Array.from(new Set(servers.map(server => server.name)))
+        .map(name => servers.find(server => server.name === name));
 
-      // Change server if no active server
-      if (serverArray.length > 0 && !activeServer) {
-        changeServer(serverArray[0], client);
+      setServerList(uniqueServers.filter(Boolean) as EnmityServer[]);
+
+      if (uniqueServers.length > 0 && !activeServer) {
+        changeServer(uniqueServers[0], client);
       }
     } catch (error) {
       console.error("Error loading server list:", error);
+      setError("Failed to load server list.");
     }
   }, [client, changeServer, activeServer]);
 
@@ -66,10 +66,10 @@ export default function ServerList(): JSX.Element {
 
   return (
     <div className='bg-dark-gray h-full flex flex-col items-center'>
+      {error && <div className="text-red-500">{error}</div>}
+      
       <button
-        className={`block p-3 aspect-square sidebar-icon border-t-2 border-t-gray-300 ${
-          activeServer === undefined ? 'selected-icon' : ''
-        }`}
+        className={`block p-3 aspect-square sidebar-icon border-t-2 border-t-gray-300 ${activeServer === undefined ? 'selected-icon' : ''}`}
         onClick={() => changeServer(undefined, client)}
       >
         <div className='rounded-icon enmity-icon'></div>
@@ -108,13 +108,12 @@ export default function ServerList(): JSX.Element {
     </div>
   );
 
-  // Function to check if the URL is valid
   function checkIfUrl(path: string): boolean {
     try {
-      new URL(path); // Try creating a new URL instance
+      new URL(path);
       return true;
     } catch {
-      return false; // Return false if it's not a valid URL
+      return false;
     }
   }
 }

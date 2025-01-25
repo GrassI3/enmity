@@ -1,13 +1,10 @@
 import { clerkClient } from '@clerk/nextjs/server';
-import { StreamChat } from 'stream-chat';
 
 export async function POST(request: Request) {
   const apiKey = process.env.STREAM_API_KEY;
   if (!apiKey) {
     return new Response('Missing Stream API key', { status: 500 });
   }
-
-  const serverClient = StreamChat.getInstance(apiKey, process.env.STREAM_SECRET);
 
   const body = await request.json();
   console.log('[/api/register-user] Body:', body);
@@ -18,13 +15,6 @@ export async function POST(request: Request) {
   if (!userId || !mail) {
     return new Response('Missing userId or email', { status: 400 });
   }
-
-  const user = await serverClient.upsertUser({
-    id: userId,
-    role: 'user',
-    name: mail,
-    imageUrl: `https://getstream.io/random_png/?id=${userId}&name=${mail}`,
-  });
 
   const params = {
     publicMetadata: {
